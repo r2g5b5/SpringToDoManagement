@@ -22,7 +22,6 @@ public class Todo {
     private String title;
     @Column(nullable = false)
     private String description;
-
     private boolean completed;
 
     public void update(String title, String description, boolean completed) {
