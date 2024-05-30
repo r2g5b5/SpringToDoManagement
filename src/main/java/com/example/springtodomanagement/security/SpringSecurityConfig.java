@@ -1,5 +1,6 @@
-package com.example.springtodomanagement.config;
+package com.example.springtodomanagement.security;
 
+import com.example.springtodomanagement.config.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
