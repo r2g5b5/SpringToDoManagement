@@ -4,7 +4,6 @@ import com.example.springtodomanagement.dtos.jwt.JWTAuthResponse;
 import com.example.springtodomanagement.dtos.login.AddLoginRequest;
 import com.example.springtodomanagement.dtos.register.AddRegisterRequest;
 import com.example.springtodomanagement.services.AuthService;
-import com.example.springtodomanagement.wrapper.BaseResult;
 import com.example.springtodomanagement.wrapper.Result;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +17,7 @@ public class AuthController {
     private AuthService service;
 
     @PostMapping("/auth/register")
-    public Result<Long> register(@RequestBody AddRegisterRequest request) {
+    public Result<String> register(@RequestBody AddRegisterRequest request) {
         return service.register(request);
     }
 

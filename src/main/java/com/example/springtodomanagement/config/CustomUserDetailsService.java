@@ -1,4 +1,4 @@
-package com.example.springtodomanagement.security;
+package com.example.springtodomanagement.config;
 
 import com.example.springtodomanagement.entities.User;
 import com.example.springtodomanagement.repository.UserRepository;
@@ -28,8 +28,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Set<GrantedAuthority> authorities = user.getRoles().stream()
                 .map((role) -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
-
-
         return new org.springframework.security.core.userdetails.User(
                 usernameOrEmail,
                 user.getPassword(),

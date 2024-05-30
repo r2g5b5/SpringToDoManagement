@@ -1,22 +1,19 @@
 package com.example.springtodomanagement.services.impl;
 
+import com.example.springtodomanagement.config.JwtService;
 import com.example.springtodomanagement.dtos.login.AddLoginRequest;
 import com.example.springtodomanagement.dtos.register.AddRegisterRequest;
 import com.example.springtodomanagement.entities.Role;
 import com.example.springtodomanagement.entities.User;
 import com.example.springtodomanagement.repository.RoleRepository;
 import com.example.springtodomanagement.repository.UserRepository;
-import com.example.springtodomanagement.security.JWTTokenProvider;
 import com.example.springtodomanagement.services.AuthService;
-import com.example.springtodomanagement.wrapper.BaseResult;
 import com.example.springtodomanagement.wrapper.Error;
 import com.example.springtodomanagement.wrapper.ErrorCodes;
 import com.example.springtodomanagement.wrapper.Result;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +21,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
-    private JWTTokenProvider jwtTokenProvider;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
 
     @Override
-    public Result<Long> register(AddRegisterRequest request) {
+    public Result<String> register(AddRegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
             return new Result<>(new Error("username: " + request.getUsername() + " exists!", ErrorCodes.ACCESS_DENIED, "username"));
@@ -51,21 +48,24 @@ public class AuthServiceImpl implements AuthService {
         User user = User.fromRegister(request, roles);
         user.setName(request.getName());
 
-        User user1 = userRepository.save(user);
+        userRepository.save(user);
 
-        return new Result<>(user1.getId());
+        String jwtToken = jwtTokenProvider.generateToken(user);
+
+        return new Result<>(jwtToken);
     }
 
     @Override
     public Result<String> login(AddLoginRequest request) {
-        Authentication authentication=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsernameOrEmail(),
-                request.getPassword()
-        ));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token= jwtTokenProvider.generateToken(authentication);
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsernameOrEmail(),
+                        request.getPassword()
+                )
+        );
+        User user = userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail()).orElseThrow();
+        String jwtToken = jwtTokenProvider.generateToken(user);
 
-
-        return new Result<>(token);
+        return new Result<>(jwtToken);
     }
 }
