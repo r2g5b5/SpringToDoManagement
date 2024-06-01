@@ -6,13 +6,17 @@ import com.example.springtodomanagement.dtos.todo.GetTodosResponse;
 import com.example.springtodomanagement.dtos.todo.UpdateTodoRequest;
 import com.example.springtodomanagement.parametrs.BaseRequestBody;
 import com.example.springtodomanagement.services.TodoService;
+import com.example.springtodomanagement.utils.ValidationUtils;
 import com.example.springtodomanagement.wrapper.BaseResult;
 import com.example.springtodomanagement.wrapper.Result;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @AllArgsConstructor
@@ -22,13 +26,21 @@ public class TodoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/todo/create")
-    public Result<Long> create(@RequestBody AddTodoRequest request) {
+    public Result<Long> create(@RequestBody @Valid AddTodoRequest request, BindingResult result) {
+        Result<Long> validationResult = ValidationUtils.handleValidationErrors(result);
+        if (validationResult != null) {
+            return validationResult;
+        }
         return service.addTodo(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/todo/update")
-    public BaseResult update(@RequestBody UpdateTodoRequest request) {
+    public BaseResult update(@RequestBody @Valid UpdateTodoRequest request, BindingResult result) {
+        Result<String> validationResult = ValidationUtils.handleValidationErrors(result);
+        if (validationResult != null) {
+            return validationResult;
+        }
         return service.updateTodo(request);
     }
 
