@@ -13,7 +13,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-// Optional, for reusing the setup across tests
 class UserRepositoryTest {
 
     //it's not necessary to write tests for userRepository for now,
@@ -56,9 +55,8 @@ class UserRepositoryTest {
 
         //assert
         assertThat(actual).isPresent();
-        User user = actual.get();
-        assertThat(user.getUsername()).isEqualTo(username);
-        assertThat(user.getRoles()).extracting(Role::getName).containsExactlyInAnyOrder("ADMIN", "USER");
+        assertThat(actual.get().getUsername()).isEqualTo(username);
+        assertThat(actual.get().getRoles()).extracting(Role::getName).containsExactlyInAnyOrder("ADMIN", "USER");
 
     }
 
