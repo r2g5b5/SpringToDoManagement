@@ -20,4 +20,16 @@ public class Result<T> extends BaseResult {
         this.isSuccess = false;
     }
 
+    public List<Error> getErrors() {
+        return errors;
+    }
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public T getData() {
+        return data;
+    }
+
 }
