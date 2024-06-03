@@ -54,7 +54,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        registerRequest =AddRegisterRequest.builder()
+        registerRequest = AddRegisterRequest.builder()
                 .name("hazhir")
                 .username("hazhir49")
                 .email("test@test.com")

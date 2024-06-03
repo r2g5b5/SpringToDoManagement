@@ -51,7 +51,7 @@ class TodoServiceImplTest {
                 .description("title Desc")
                 .completed(false).build();
 
-        updateTodoRequest= UpdateTodoRequest.builder()
+        updateTodoRequest = UpdateTodoRequest.builder()
                 .title("title updated ver")
                 .description("des updated ver")
                 .completed(true).build();
@@ -154,7 +154,7 @@ class TodoServiceImplTest {
     void getTodo() {
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(todo));
 
-        Result<GetTodoResponse> result=service.getTodo(1L);
+        Result<GetTodoResponse> result = service.getTodo(1L);
 
         assertThat(result).isNotNull();
         assertThat(result.isSuccess).isTrue();
@@ -165,7 +165,7 @@ class TodoServiceImplTest {
     }
 
     @Test
-    void cantFindTodoById(){
+    void cantFindTodoById() {
         when(repository.findById(100L)).thenReturn(Optional.empty());
 
         Result<GetTodoResponse> result = service.getTodo(100L);
@@ -178,10 +178,10 @@ class TodoServiceImplTest {
     void deleteTodo() {
         when(repository.existsById(1L)).thenReturn(true);
 
-        BaseResult result=service.deleteTodo(1L);
+        BaseResult result = service.deleteTodo(1L);
 
         assertThat(result.isSuccess).isTrue();
-        verify(repository,times(1)).deleteById(1L);
+        verify(repository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -201,11 +201,11 @@ class TodoServiceImplTest {
     void completeTodo() {
         when(repository.findById(1L)).thenReturn(Optional.of(todo));
 
-        BaseResult result=service.completeTodo(1L);
+        BaseResult result = service.completeTodo(1L);
 
         assertThat(result.isSuccess).isTrue();
 
-        verify(repository,times(1)).save(todo);
+        verify(repository, times(1)).save(todo);
         assertThat(todo.isCompleted()).isTrue();
     }
 
@@ -230,11 +230,11 @@ class TodoServiceImplTest {
     void inCompleteTodo() {
         when(repository.findById(1L)).thenReturn(Optional.of(todo));
 
-        BaseResult result=service.inCompleteTodo(1L);
+        BaseResult result = service.inCompleteTodo(1L);
 
         assertThat(result.isSuccess).isTrue();
 
-        verify(repository,times(1)).save(todo);
+        verify(repository, times(1)).save(todo);
         assertThat(todo.isCompleted()).isFalse();
 
 
