@@ -16,7 +16,7 @@ class RoleRepositoryTest {
     @Autowired
     private RoleRepository underTest;
 
-    private String roleName = "ADMIN";
+    private final String roleName = "ADMIN";
 
     @BeforeEach
     void setUp() {

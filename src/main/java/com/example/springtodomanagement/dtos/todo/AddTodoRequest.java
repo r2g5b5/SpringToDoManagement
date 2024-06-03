@@ -3,13 +3,11 @@ package com.example.springtodomanagement.dtos.todo;
 import com.example.springtodomanagement.entities.Todo;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddTodoRequest {

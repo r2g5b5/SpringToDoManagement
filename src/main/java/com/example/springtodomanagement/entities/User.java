@@ -3,10 +3,7 @@ package com.example.springtodomanagement.entities;
 import com.example.springtodomanagement.dtos.register.AddRegisterRequest;
 import com.example.springtodomanagement.dtos.todo.GetTodosResponse;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +17,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

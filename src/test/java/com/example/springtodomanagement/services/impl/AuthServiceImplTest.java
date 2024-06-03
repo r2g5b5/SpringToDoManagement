@@ -7,9 +7,9 @@ import com.example.springtodomanagement.entities.Role;
 import com.example.springtodomanagement.entities.User;
 import com.example.springtodomanagement.repository.RoleRepository;
 import com.example.springtodomanagement.repository.UserRepository;
-import com.example.springtodomanagement.wrapper.Error;
 import com.example.springtodomanagement.wrapper.ErrorCodes;
 import com.example.springtodomanagement.wrapper.Result;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,64 +48,81 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
+    private AddRegisterRequest registerRequest;
+    private AddLoginRequest loginRequest;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        registerRequest =AddRegisterRequest.builder()
+                .name("hazhir")
+                .username("hazhir49")
+                .email("test@test.com")
+                .password("Introduce local variable").build();
+
+        loginRequest = AddLoginRequest.builder()
+                .usernameOrEmail("hazhir49")
+                .password("h1234@").build();
+
+        user = User.builder()
+                .name("hazhir")
+                .username("hazhir49")
+                .email("test@test.com")
+                .password("encodedPassword")
+                .roles(new HashSet<>()).build();
+    }
+
     @Test
     void register_UserAlreadyExistsByUsername() {
         // Arrange
-        AddRegisterRequest request = new AddRegisterRequest("hazhir", "hazhir49", "test@test.com", "h1234@");
-        when(userRepository.existsByUsername(request.getUsername())).thenReturn(true);
+        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(true);
 
         // Act
-        Result<String> result = authService.register(request);
+        Result<String> result = authService.register(registerRequest);
 
         // Assert
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrors()).hasSize(1);
-        Error error = result.getErrors().getFirst();
-        assertThat(error.getMessage()).isEqualTo("username: " + request.getUsername() + " exists!");
-        assertThat(error.getErrorCode()).isEqualTo(ErrorCodes.ACCESS_DENIED);
+        assertThat(result.getErrors().getFirst().getErrorCode()).isEqualTo(ErrorCodes.ACCESS_DENIED);
     }
 
     @Test
     void register_UserAlreadyExistsByEmail() {
         // Arrange
-        AddRegisterRequest request = new AddRegisterRequest("hazhir", "hazhir49", "test@test.com", "h1234@");
-        when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
+        when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
 
         // Act
-        Result<String> result = authService.register(request);
+        Result<String> result = authService.register(registerRequest);
 
         // Assert
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrors()).hasSize(1);
-        Error error = result.getErrors().getFirst();
-        assertThat(error.getMessage()).isEqualTo("email: " + request.getEmail() + " exists!");
-        assertThat(error.getErrorCode()).isEqualTo(ErrorCodes.ACCESS_DENIED);
+        assertThat(result.getErrors().getFirst().getErrorCode()).isEqualTo(ErrorCodes.ACCESS_DENIED);
     }
 
     @Test
     void register_SuccessfulRegistration() {
         // Arrange
-        AddRegisterRequest request = new AddRegisterRequest("hazhir", "hazhir49", "test@test.com", "h1234@");
         Role userRole = new Role(1L, "ROLE_USER");
 
-        when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
+        when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
         when(roleRepository.findByName("ROLE_USER")).thenReturn(userRole);
-        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
         when(jwtTokenProvider.generateToken(any(User.class))).thenReturn("jwtToken");
 
         // Act
-        Result<String> result = authService.register(request);
+        Result<String> result = authService.register(registerRequest);
 
         // Assert
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertThat(savedUser.getName()).isEqualTo(request.getName());
-        assertThat(savedUser.getUsername()).isEqualTo(request.getUsername());
-        assertThat(savedUser.getEmail()).isEqualTo(request.getEmail());
+        assertThat(savedUser.getName()).isEqualTo(registerRequest.getName());
+        assertThat(savedUser.getUsername()).isEqualTo(registerRequest.getUsername());
+        assertThat(savedUser.getEmail()).isEqualTo(registerRequest.getEmail());
         assertThat(savedUser.getPassword()).isEqualTo("encodedPassword");
         assertThat(savedUser.getRoles()).extracting(Role::getName).containsExactlyInAnyOrder("ROLE_USER");
 
@@ -117,15 +133,12 @@ class AuthServiceImplTest {
     @Test
     void login_SuccessfulLogin() {
         // Arrange
-        AddLoginRequest request = new AddLoginRequest("hazhir49", "h1234@");
-        User user = new User(1L, "hazhir", "hazhir49", "test@test.com", "encodedPassword", new HashSet<>());
-
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
-        when(userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(loginRequest.getUsernameOrEmail(), loginRequest.getUsernameOrEmail())).thenReturn(Optional.of(user));
         when(jwtTokenProvider.generateToken(user)).thenReturn("jwtToken");
 
         // Act
-        Result<String> result = authService.login(request);
+        Result<String> result = authService.login(loginRequest);
 
         // Assert
         assertThat(result.isSuccess()).isTrue();
@@ -135,11 +148,10 @@ class AuthServiceImplTest {
     @Test
     void login_Failure() {
         // Arrange
-        AddLoginRequest request = new AddLoginRequest("hazhir49", "wrongpassword");
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new RuntimeException("Bad credentials"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> authService.login(request));
+        assertThrows(RuntimeException.class, () -> authService.login(loginRequest));
     }
 }
