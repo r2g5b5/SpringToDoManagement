@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Setter
@@ -23,7 +25,8 @@ public class GetTodosResponse {
     }
 
     public static List<GetTodosResponse> fromTodoList(List<Todo> todos) {
-        return todos.stream()
+        return Optional.ofNullable(todos).orElse(List.of())
+                .stream()
                 .map(GetTodosResponse::fromTodo)
                 .collect(Collectors.toList());
     }

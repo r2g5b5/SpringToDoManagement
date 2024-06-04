@@ -11,26 +11,29 @@ import com.example.springtodomanagement.wrapper.BaseResult;
 import com.example.springtodomanagement.wrapper.Error;
 import com.example.springtodomanagement.wrapper.ErrorCodes;
 import com.example.springtodomanagement.wrapper.Result;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TodoServiceImpl implements TodoService {
 
 
-    private TodoRepository repository;
+    private final TodoRepository repository;
 
     @Override
+    @Transactional
     public Result<Long> addTodo(AddTodoRequest request) {
         Todo todo2 = repository.save(request.toTodo());
         return new Result<>(todo2.getId());
     }
 
     @Override
+    @Transactional
     public BaseResult updateTodo(UpdateTodoRequest request) {
         Optional<Todo> todo2 = repository.findById(request.getId());
         if (todo2.isEmpty()) {
@@ -58,6 +61,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional
     public BaseResult deleteTodo(Long id) {
         if (!repository.existsById(id)) {
             return new BaseResult(new Error("cant find todo with id: " + id, ErrorCodes.NOT_FOUND, "todoId"));
@@ -67,6 +71,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional
     public BaseResult completeTodo(Long id) {
         Optional<Todo> todo2 = repository.findById(id);
         if (todo2.isEmpty()) {
@@ -78,6 +83,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional
     public BaseResult inCompleteTodo(Long id) {
         Optional<Todo> todo2 = repository.findById(id);
         if (todo2.isEmpty()) {
